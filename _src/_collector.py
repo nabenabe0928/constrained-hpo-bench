@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import os
-
 import numpy as np
 
 import pandas as pd
@@ -43,10 +41,11 @@ class Collector:
         mask = cls.get_mask(df, threshold)
         return np.sum(mask) / len(mask)
 
-    def get_optimal_values(self, df: pd.DataFrame, threshold: dict[str, float]) -> float:
+    def get_optimal_values(
+        self, df: pd.DataFrame, threshold: dict[str, float]
+    ) -> float:
         mask = self.get_mask(df, threshold)
         return df[mask][self._obj_names.loss].min()
-
 
     def get_overlap_ratio_with_top_configs(
         self,
@@ -56,7 +55,6 @@ class Collector:
     ) -> float:
         mask = self.get_mask(df, threshold)
         return np.sum(df[mask][self._obj_names.loss] <= top_val) / len(mask)
-
 
     def create_database(self, df: pd.DataFrame) -> pd.DataFrame:
         thresholds = self.get_thresholds(df)

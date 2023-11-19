@@ -12,12 +12,16 @@ class BenchmarkWrapper(Benchmark):
     def __init__(
         self,
         task: Literal["colorectal_histology", "cifar10", "fashion_mnist"],
-        save_dir: str = os.path.join(os.environ["HOME"], "tabular_benchmarks/jahs_bench_data/"),
+        save_dir: str = os.path.join(
+            os.environ["HOME"], "tabular_benchmarks/jahs_bench_data/"
+        ),
         download: bool = False,
         metrics: list[str] | None = None,
     ):
         metrics = ["valid-acc", "size_MB", "runtime"] if metrics is None else metrics[:]
-        super().__init__(task=task, download=download, save_dir=save_dir, metrics=metrics)
+        super().__init__(
+            task=task, download=download, save_dir=save_dir, metrics=metrics
+        )
 
     def __call__(self, feats: pd.DataFrame, nepochs: int | None = 200) -> pd.DataFrame:
 

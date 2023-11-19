@@ -55,7 +55,9 @@ if __name__ == "__main__":
     target_path = "chpobench/metadata/"
     os.makedirs(target_path, exist_ok=True)
     for dataset_name in DATASET_NAMES:
-        data_path = os.path.join(os.environ["HOME"], f"tabular_benchmarks/hpolib/{dataset_name}")
+        data_path = os.path.join(
+            os.environ["HOME"], f"tabular_benchmarks/hpolib/{dataset_name}"
+        )
         df = get_dataframe(data_path)
         collector = Collector(obj_names=OBJ_NAMES, n_total=N_TOTAL * N_SEEDS)
         db = collector.create_database(df)

@@ -4,8 +4,6 @@ import os
 from argparse import ArgumentParser
 from dataclasses import dataclass
 
-import numpy as np
-
 import pandas as pd
 
 from _src._jahs_wrapper import BenchmarkWrapper
@@ -56,7 +54,7 @@ def save_results(dataset_name: str) -> None:
     df = pd.concat(results, ignore_index=True).astype("float32")
     df["valid-err"] = (df["valid-err"] * 100).astype(int) / 100
     df["runtime"] = df["runtime"].astype(int) / 1.0
-    df["size_MB"] = (df["size_MB"] * 10 ** 5).astype(int) / 10 ** 5
+    df["size_MB"] = (df["size_MB"] * 10**5).astype(int) / 10**5
     df.to_csv(
         os.path.join(TARGET_DIR, f"{dataset_name}.csv"),
         index=False,

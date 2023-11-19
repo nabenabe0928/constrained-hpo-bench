@@ -4,8 +4,6 @@ import json
 import os
 import pickle
 
-import pandas as pd
-
 from chpobench.base import (
     BaseBench,
     BaseDistributionParams,
@@ -14,10 +12,15 @@ from chpobench.base import (
     OrdinalDistributionParams,
 )
 
+
 class HPOLib(BaseBench):
     def _init_bench(self):
-        self._search_space = json.load(open(os.path.join(self._curdir, "discrete_spaces.json")))["hpolib"]
-        self._data = pickle.load(open(os.path.join(self._data_path, f"{self._dataset_name}.pkl"), mode="rb"))
+        self._search_space = json.load(
+            open(os.path.join(self._curdir, "discrete_spaces.json"))
+        )["hpolib"]
+        self._data = pickle.load(
+            open(os.path.join(self._data_path, f"{self._dataset_name}.pkl"), mode="rb")
+        )
 
     def __call__(
         self,
@@ -34,7 +37,9 @@ class HPOLib(BaseBench):
 
         MAX_EPOCHS = 100
         if epochs > MAX_EPOCHS or epochs < 1:
-            raise ValueError(f"`epochs` of HPOLib must be in [1, {MAX_EPOCHS}], but got {epochs=}")
+            raise ValueError(
+                f"`epochs` of HPOLib must be in [1, {MAX_EPOCHS}], but got {epochs=}"
+            )
 
         return dict(
             loss=query["valid_mse"][seed][epochs - 1],
@@ -47,7 +52,9 @@ class HPOLib(BaseBench):
         config_space = []
         for name, choices in self._search_space.items():
             if isinstance(choices[0], str):
-                config_space.append(CategoricalDistributionParams(name=name, choices=choices))
+                config_space.append(
+                    CategoricalDistributionParams(name=name, choices=choices)
+                )
             else:
                 config_space.append(OrdinalDistributionParams(name=name, seq=choices))
 
