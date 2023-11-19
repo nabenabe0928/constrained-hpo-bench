@@ -15,25 +15,12 @@ from chpobench.base import (
 
 class HPOBench(BaseBench):
     def _init_bench(self) -> None:
-        self._dataset_names = [
-            "australian",
-            "blood_transfusion",
-            "car",
-            "credit_g",
-            "kc1",
-            "phoneme",
-            "segment",
-            "vehicle",
-        ]
-        self._validate_dataset_name()
         self._search_space = json.load(
             open(os.path.join(self._curdir, "discrete_spaces.json"))
         )["hpobench"]
         self._data = pickle.load(
             open(os.path.join(self._data_path, f"{self._dataset_name}.pkl"), mode="rb")
         )
-        self._avail_constraint_names = ["precision", "runtime"]
-        self._avail_obj_names = ["precision", "f1", "runtime", "loss"]
 
     def __call__(
         self,
@@ -68,6 +55,27 @@ class HPOBench(BaseBench):
             precision=query["precision"][seed][epochs],
         )
         return {k: v for k, v in results.items() if k in self._metric_names}
+
+    @property
+    def dataset_names(self) -> list[str]:
+        return [
+            "australian",
+            "blood_transfusion",
+            "car",
+            "credit_g",
+            "kc1",
+            "phoneme",
+            "segment",
+            "vehicle",
+        ]
+
+    @property
+    def avail_obj_names(self) -> list[str]:
+        return ["precision", "f1", "runtime", "loss"]
+
+    @property
+    def avail_constraint_names(self) -> list[str]:
+        return ["precision", "runtime"]
 
     @property
     def config_space(self) -> dict[str, BaseDistributionParams]:

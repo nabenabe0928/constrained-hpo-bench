@@ -15,21 +15,12 @@ from chpobench.base import (
 
 class HPOLib(BaseBench):
     def _init_bench(self) -> None:
-        self._dataset_names = [
-            "parkinsons_telemonitoring",
-            "protein_structure",
-            "naval_propulsion",
-            "slice_localization",
-        ]
-        self._validate_dataset_name()
         self._search_space = json.load(
             open(os.path.join(self._curdir, "discrete_spaces.json"))
         )["hpolib"]
         self._data = pickle.load(
             open(os.path.join(self._data_path, f"{self._dataset_name}.pkl"), mode="rb")
         )
-        self._avail_constraint_names = ["model_size", "runtime"]
-        self._avail_obj_names = ["model_size", "runtime", "loss"]
 
     def __call__(
         self,
@@ -63,6 +54,24 @@ class HPOLib(BaseBench):
             runtime=query["runtime"][seed] * epochs / MAX_EPOCHS,
         )
         return {k: v for k, v in results.items() if k in self._metric_names}
+
+    @property
+    def dataset_names(self) -> list[str]:
+        return [
+            "parkinsons_telemonitoring",
+            "protein_structure",
+            "naval_propulsion",
+            "slice_localization",
+        ]
+
+    @property
+    def avail_obj_names(self) -> list[str]:
+        return ["model_size", "runtime", "loss"]
+
+    @property
+    def avail_constraint_names(self) -> list[str]:
+        return ["model_size", "runtime"]
+
 
     @property
     def config_space(self) -> dict[str, BaseDistributionParams]:

@@ -2,3 +2,8 @@ venv/
 .ipynb_checkpoints/
 **/__pycache__/
 _src/jahs_grid_data/
+.mypy_cache/
+
+dist/
+build/
+*.egg-info/

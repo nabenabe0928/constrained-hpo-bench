@@ -17,8 +17,6 @@ from chpobench.base import (
 
 class JAHSBench201(BaseBench):
     def _init_bench(self) -> None:
-        self._dataset_names = ["colorectal_histology", "cifar10", "fashion_mnist"]
-        self._validate_dataset_name()
         self._discrete_space = json.load(
             open(os.path.join(self._curdir, "discrete_spaces.json"))
         )["jahs-bench-201"]
@@ -33,8 +31,6 @@ class JAHSBench201(BaseBench):
             metrics=[metric_dict[name] for name in self._metric_names],
             download=False,
         )
-        self._avail_constraint_names = ["model_size", "runtime"]
-        self._avail_obj_names = ["model_size", "runtime", "loss"]
 
     def __call__(
         self,
@@ -58,6 +54,18 @@ class JAHSBench201(BaseBench):
             metric_dict[k]: 100.0 - v if k == "valid-acc" else v
             for k, v in preds.items()
         }
+
+    @property
+    def dataset_names(self) -> list[str]:
+        return ["colorectal_histology", "cifar10", "fashion_mnist"]
+
+    @property
+    def avail_obj_names(self) -> list[str]:
+        return ["model_size", "runtime", "loss"]
+
+    @property
+    def avail_constraint_names(self) -> list[str]:
+        return ["model_size", "runtime"]
 
     @property
     def config_space(self) -> dict[str, BaseDistributionParams]:

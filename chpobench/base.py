@@ -72,6 +72,7 @@ class BaseBench(metaclass=ABCMeta):
     ):
         self._data_path = data_path
         self._dataset_name = dataset_name
+        self._validate_dataset_name()
         self._quantiles = quantiles
         self._metric_names = metric_names[:]
         self._rng = np.random.RandomState(seed)
@@ -87,35 +88,33 @@ class BaseBench(metaclass=ABCMeta):
                 f"{metric_names=} and {quantiles.keys()=}"
             )
 
-        self._avail_constraint_names: list[str]
-        self._avail_obj_names: list[str]
-        self._dataset_names: list[str]
         self._init_bench()
         self._constraints: dict[str, float]
         self._set_constraints()
         self._validate_metric_names()
 
     def _validate_dataset_name(self) -> None:
-        if self._dataset_name not in self._dataset_names:
+        if self._dataset_name not in self.dataset_names:
             raise ValueError(
-                f"dataset_name must be in {self._dataset_names}, but got {self._dataset_name}."
+                f"dataset_name must be in {self.dataset_names}, but got {self._dataset_name}."
             )
 
     def _validate_metric_names(self) -> None:
-        if not set(self._metric_names).issubset(set(self._avail_obj_names)):
+        avail_obj_names = self.avail_obj_names
+        if not set(self._metric_names).issubset(set(avail_obj_names)):
             raise ValueError(
-                f"metric_names must be a subset of {self._avail_obj_names}, but got {self._metric_names}"
+                f"metric_names must be a subset of {avail_obj_names}, but got {self._metric_names}"
             )
-        if not set(self._quantiles).issubset(set(self._avail_obj_names)):
+        if not set(self._quantiles).issubset(set(avail_obj_names)):
             raise ValueError(
-                f"Keys of quantiles must be a subset of {self._avail_obj_names}, but got {list(self._quantiles.keys())}"
+                f"Keys of quantiles must be a subset of {avail_obj_names}, but got {list(self._quantiles.keys())}"
             )
 
     def _set_constraints(self) -> None:
         constraint_info = self.constraint_info
         mask = True
         quantiles = self._quantiles.copy()
-        for cstr_name in self._avail_constraint_names:
+        for cstr_name in self.avail_constraint_names:
             if cstr_name not in quantiles:
                 quantiles[cstr_name] = 1.0
 
@@ -144,10 +143,14 @@ class BaseBench(metaclass=ABCMeta):
         fidel_space = self.fidel_space
         for name in config:
             if config[name] not in config_space[name]:
-                raise ValueError(f"`{name}` must follow {config_space[name]}, but got {config[name]}.")
+                raise ValueError(
+                    f"`{name}` must follow {config_space[name]}, but got {config[name]}."
+                )
         for name in fidels:
             if fidels[name] not in fidel_space[name]:
-                raise ValueError(f"`{name}` must follow {fidel_space[name]}, but got {fidels[name]}.")
+                raise ValueError(
+                    f"`{name}` must follow {fidel_space[name]}, but got {fidels[name]}."
+                )
 
     @abstractmethod
     def _init_bench(self) -> None:
@@ -169,6 +172,21 @@ class BaseBench(metaclass=ABCMeta):
     @property
     @abstractmethod
     def fidel_space(self) -> dict[str, BaseDistributionParams]:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def avail_obj_names(self) -> list[str]:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def avail_constraint_names(self) -> list[str]:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def dataset_names(self) -> list[str]:
         raise NotImplementedError
 
     @property
