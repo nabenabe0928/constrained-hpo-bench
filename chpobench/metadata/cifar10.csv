@@ -1,4 +1,4 @@
-size_MB_quantile,size_MB_threshold,runtime_quantile,runtime_threshold,optimal_val,feasible_ratio,top_10%_overlap,top_1%_overlap
+model_size_quantile,model_size_threshold,runtime_quantile,runtime_threshold,optimal_val,feasible_ratio,top_10%_overlap,top_1%_overlap
 0.001,0.00489,0.001,7621.0,26.9,0.0002788888888888889,0.0,0.0
 0.001,0.00489,0.005,9182.0,26.03,0.001182962962962963,0.0,0.0
 0.001,0.00489,0.01,10172.0,26.03,0.0013427407407407407,0.0,0.0

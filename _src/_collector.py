@@ -11,7 +11,7 @@ from chpobench.constants import QUANTILES
 
 class ObjectiveNames:
     loss: str
-    size: str
+    model_size: str
     runtime: str
 
 
@@ -68,27 +68,27 @@ class Collector:
         ]
 
         data = {
-            f"{self._obj_names.size}_quantile": [],
-            f"{self._obj_names.size}_threshold": [],
-            f"{self._obj_names.runtime}_quantile": [],
-            f"{self._obj_names.runtime}_threshold": [],
+            "model_size_quantile": [],
+            "model_size_threshold": [],
+            "runtime_quantile": [],
+            "runtime_threshold": [],
             "optimal_val": [],
             "feasible_ratio": [],
             "top_10%_overlap": [],
             "top_1%_overlap": [],
         }
         quantiles = QUANTILES[:]
-        for qs, ts in zip(quantiles, thresholds[self._obj_names.size]):
+        for qs, ts in zip(quantiles, thresholds[self._obj_names.model_size]):
             for qr, tr in zip(quantiles, thresholds[self._obj_names.runtime]):
-                th = {self._obj_names.size: ts, self._obj_names.runtime: tr}
+                th = {self._obj_names.model_size: ts, self._obj_names.runtime: tr}
                 th = {k: v for k, v in th.items() if v is not None}
                 if len(th) == 0:
                     continue
 
-                data[f"{self._obj_names.size}_quantile"].append(qs)
-                data[f"{self._obj_names.size}_threshold"].append(ts)
-                data[f"{self._obj_names.runtime}_quantile"].append(qr)
-                data[f"{self._obj_names.runtime}_threshold"].append(tr)
+                data["model_size_quantile"].append(qs)
+                data["model_size_threshold"].append(ts)
+                data["runtime_quantile"].append(qr)
+                data["runtime_threshold"].append(tr)
                 data["optimal_val"].append(self.get_optimal_values(df, threshold=th))
                 data["feasible_ratio"].append(self.get_feasible_ratio(df, threshold=th))
                 data["top_10%_overlap"].append(

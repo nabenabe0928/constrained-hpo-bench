@@ -16,7 +16,7 @@ from _src._collector import Collector, ObjectiveNames
 @dataclass(frozen=True)
 class HPOLibObjectiveNames(ObjectiveNames):
     loss: str = "valid_mse"
-    size: str = "n_params"
+    model_size: str = "n_params"
     runtime: str = "runtime"
 
 

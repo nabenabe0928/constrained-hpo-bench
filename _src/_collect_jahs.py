@@ -14,7 +14,7 @@ from _src._jahs_wrapper import BenchmarkWrapper
 @dataclass(frozen=True)
 class _ObjectiveNames:
     loss: str = "valid-acc"
-    size: str = "size_MB"
+    model_size: str = "size_MB"
     runtime: str = "runtime"
 
 
