@@ -10,7 +10,7 @@ bench = HPOBench(
     metric_names=["runtime", "loss", "precision"],
 )
 
-config = {config_info.name: config_info.seq[0] for config_info in bench.config_space}
+config = {name: config_info.seq[0] for name, config_info in bench.config_space.items()}
 
 print(bench.constraints)
 print(bench.constraint_info)

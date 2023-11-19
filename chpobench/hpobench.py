@@ -33,6 +33,7 @@ class HPOBench(BaseBench):
             open(os.path.join(self._data_path, f"{self._dataset_name}.pkl"), mode="rb")
         )
         self._avail_constraint_names = ["precision", "runtime"]
+        self._avail_obj_names = ["precision", "f1", "runtime", "loss"]
 
     def __call__(
         self,
@@ -62,18 +63,21 @@ class HPOBench(BaseBench):
             loss=1.0 - query["bal_acc"][seed][epochs],
             runtime=query["runtime"][seed][epochs],
             f1=query["f1"][seed][epochs],
-            precision=query["precision"][seed][epochs]
+            precision=query["precision"][seed][epochs],
         )
         return {k: v for k, v in results.items() if k in self._metric_names}
 
     @property
-    def config_space(self) -> list[BaseDistributionParams]:
-        config_space = [
-            OrdinalDistributionParams(name=name, seq=choices)
+    def config_space(self) -> dict[str, BaseDistributionParams]:
+        config_space = {
+            name: OrdinalDistributionParams(name=name, seq=choices)
             for name, choices in self._search_space.items()
-        ]
+        }
+
         return config_space
 
     @property
     def fidel_space(self) -> list[BaseDistributionParams]:
-        return [OrdinalDistributionParams(name="epochs", seq=[3, 9, 27, 81, 243])]
+        return {
+            "epochs": OrdinalDistributionParams(name="epochs", seq=[3, 9, 27, 81, 243])
+        }

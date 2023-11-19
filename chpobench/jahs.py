@@ -34,6 +34,7 @@ class JAHSBench201(BaseBench):
             download=False,
         )
         self._avail_constraint_names = ["model_size", "runtime"]
+        self._avail_obj_names = ["model_size", "runtime", "loss"]
 
     def __call__(
         self,
@@ -58,28 +59,30 @@ class JAHSBench201(BaseBench):
         }
 
     @property
-    def config_space(self) -> list[BaseDistributionParams]:
-        config_space = [
-            FloatDistributionParams(
+    def config_space(self) -> dict[str, BaseDistributionParams]:
+        config_space = {
+            "LearningRate": FloatDistributionParams(
                 name="LearningRate", lower=1e-3, upper=1.0, log=True
             ),
-            FloatDistributionParams(
+            "WeightDecay": FloatDistributionParams(
                 name="WeightDecay", lower=1e-5, upper=1e-2, log=True
             ),
-        ]
+        }
         for name, choices in self._discrete_space.items():
             if name in ["N", "W"]:
-                config_space.append(OrdinalDistributionParams(name=name, seq=choices))
+                config_space[name] = OrdinalDistributionParams(name=name, seq=choices)
             else:
-                config_space.append(
-                    CategoricalDistributionParams(name=name, choices=choices)
+                config_space[name] = CategoricalDistributionParams(
+                    name=name, choices=choices
                 )
 
         return config_space
 
     @property
-    def fidel_space(self) -> list[BaseDistributionParams]:
-        return [
-            IntDistributionParams(name="epochs", lower=1, upper=100),
-            FloatDistributionParams(name="Resolution", lower=0.0, upper=1.0),
-        ]
+    def fidel_space(self) -> dict[str, BaseDistributionParams]:
+        return {
+            "epochs": IntDistributionParams(name="epochs", lower=1, upper=100),
+            "Resolution": FloatDistributionParams(
+                name="Resolution", lower=0.0, upper=1.0
+            ),
+        }

@@ -29,6 +29,7 @@ class HPOLib(BaseBench):
             open(os.path.join(self._data_path, f"{self._dataset_name}.pkl"), mode="rb")
         )
         self._avail_constraint_names = ["model_size", "runtime"]
+        self._avail_obj_names = ["model_size", "runtime", "loss"]
 
     def __call__(
         self,
@@ -62,18 +63,18 @@ class HPOLib(BaseBench):
         return {k: v for k, v in results.items() if k in self._metric_names}
 
     @property
-    def config_space(self) -> list[BaseDistributionParams]:
-        config_space = []
+    def config_space(self) -> dict[str, BaseDistributionParams]:
+        config_space = {}
         for name, choices in self._search_space.items():
             if isinstance(choices[0], str):
-                config_space.append(
-                    CategoricalDistributionParams(name=name, choices=choices)
+                config_space[name] = CategoricalDistributionParams(
+                    name=name, choices=choices
                 )
             else:
-                config_space.append(OrdinalDistributionParams(name=name, seq=choices))
+                config_space[name] = OrdinalDistributionParams(name=name, seq=choices)
 
         return config_space
 
     @property
-    def fidel_space(self) -> list[BaseDistributionParams]:
-        return [IntDistributionParams(name="epochs", lower=1, upper=100)]
+    def fidel_space(self) -> dict[str, BaseDistributionParams]:
+        return {"epochs": IntDistributionParams(name="epochs", lower=1, upper=100)}

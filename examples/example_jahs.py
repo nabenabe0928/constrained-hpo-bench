@@ -11,10 +11,10 @@ bench = JAHSBench201(
 )
 
 config = {
-    config_info.name: config_info.choices[0]
+    name: config_info.choices[0]
     if hasattr(config_info, "choices")
     else (config_info.seq[0] if hasattr(config_info, "seq") else config_info.lower)
-    for config_info in bench.config_space
+    for name, config_info in bench.config_space.items()
 }
 
 print(bench.constraints)
