@@ -69,14 +69,14 @@ class BaseBench(metaclass=ABCMeta):
         data_path: str,
         dataset_name: str,
         quantiles: dict[str, float],
-        metric_names: list[Literal["loss", "model_size", "runtime", "precision", "f1"]],
+        metric_names: list[Literal["loss", "model_size", "runtime", "precision", "f1"]] | None = None,
         seed: int | None = None,
     ):
         self._data_path = data_path
         self._dataset_name = dataset_name
         self._validate_dataset_name()
         self._quantiles = quantiles
-        self._metric_names = metric_names[:]
+        self._metric_names = deepcopy(metric_names) if metric_names is not None else self.avail_obj_names
         self._rng = np.random.RandomState(seed)
 
         if any(q not in constants.QUANTILES for q in quantiles.values()):
@@ -210,6 +210,10 @@ class BaseBench(metaclass=ABCMeta):
         return pd.read_csv(
             os.path.join(self._curdir, "metadata", f"{self._dataset_name}.csv")
         )
+
+    @classmethod
+    def avail_quantiles(cls) -> list[float]:
+        return deepcopy(constants.QUANTILES)
 
     @classmethod
     def get_constraint_info(cls, dataset_name: str) -> pd.DataFrame:

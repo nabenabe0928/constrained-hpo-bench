@@ -12,11 +12,13 @@ For this reason, I provide a benchmark dataset that can control the difficulties
 
 ## Setup
 
+This benchmark requires Python 3.9 or later.
+
 First, you need to install the dependencies:
 
 ```shell
 $ python -m venv venv
-$ pip install -r requirements.txt
+$ pip install chpobench
 ```
 
 Next, you will download the dataset (if necessary):
@@ -77,4 +79,42 @@ $ wget https://ml.informatik.uni-freiburg.de/research-artifacts/jahs_bench_201/v
 
 ## Benchmark Usage
 
-0.1, 0.5, 1, 5, 10, 25, 50, 75, 90, 95, 100
+Here is an example using HPOBench:
+
+```python
+import os
+
+from chpobench import HPOBench
+
+
+# Show all the available dataset names.
+print(f"{HPOBench.dataset_names=}")
+# Show all the available constraint names.
+print(f"{HPOBench.avail_constraint_names=}")
+# Show all the available objective metric names.
+print(f"{HPOBench.avail_obj_names=}")
+# Show the search space.
+print(f"{HPOBench.config_space=}")
+# Show the fidelity space.
+print(f"{HPOBench.fidel_space=}")
+
+# Check the constraint information by this.
+print(HPOBench.get_constraint_info(HPOBench.dataset_names[0]))
+bench = HPOBench(
+    # You need to specify where you store the benchmark data downloaded above.
+    data_path=os.path.join(os.environ["HOME"], "hpo_benchmarks/hpobench/"),
+    # You need to give the dataset name to test.
+    dataset_name=HPOBench.dataset_names[0],
+    # Quantiles control the tightness of each constraint. HPOBench.avail_quantiles shows the available quantiles.
+    quantiles={"runtime": 0.1, "precision": 0.5},
+    # metric_names=[...]  # Less metric specification can reduce memory consumption for JAHS-Bench-201.
+)
+
+config = {name: config_info.seq[0] for name, config_info in bench.config_space.items()}
+
+print(bench.constraints)
+print(bench(config))
+
+```
+
+For more details, please check [the examples](examples/).

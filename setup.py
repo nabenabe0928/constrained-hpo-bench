@@ -16,7 +16,7 @@ setuptools.setup(
     url="https://github.com/nabenabe0928/constrained-hpo-bench",
     packages=["chpobench/", "chpobench/metadata/"],
     package_data={"": os.listdir("chpobench/metadata/") + ["discrete_spaces.json"]},
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     platforms=["Linux", "Darwin"],
     install_requires=requirements,
     include_package_data=True,

@@ -15,7 +15,6 @@ bench = HPOLib(
     data_path=os.path.join(os.environ["HOME"], "hpo_benchmarks/hpolib/"),
     dataset_name=HPOLib.dataset_names[0],
     quantiles={"runtime": 0.1, "model_size": 0.5},
-    metric_names=HPOLib.avail_obj_names,
 )
 
 config = {
