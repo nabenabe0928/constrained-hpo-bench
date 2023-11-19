@@ -62,6 +62,8 @@ class CategoricalDistributionParams(BaseDistributionParams):
 
 
 class BaseBench(metaclass=ABCMeta):
+    _curdir = os.path.dirname(os.path.abspath(__file__))
+
     def __init__(
         self,
         data_path: str,
@@ -76,7 +78,6 @@ class BaseBench(metaclass=ABCMeta):
         self._quantiles = quantiles
         self._metric_names = metric_names[:]
         self._rng = np.random.RandomState(seed)
-        self._curdir = os.path.dirname(os.path.abspath(__file__))
 
         if any(q not in constants.QUANTILES for q in quantiles.values()):
             raise ValueError(
@@ -164,29 +165,40 @@ class BaseBench(metaclass=ABCMeta):
     ) -> dict[str, float]:
         raise NotImplementedError
 
+    @classmethod
     @property
     @abstractmethod
-    def config_space(self) -> dict[str, BaseDistributionParams]:
+    def config_space(cls) -> dict[str, BaseDistributionParams]:
         raise NotImplementedError
 
+    @classmethod
     @property
     @abstractmethod
-    def fidel_space(self) -> dict[str, BaseDistributionParams]:
+    def fidel_space(cls) -> dict[str, BaseDistributionParams]:
         raise NotImplementedError
 
+    @classmethod
     @property
     @abstractmethod
-    def avail_obj_names(self) -> list[str]:
+    def avail_obj_names(cls) -> list[str]:
         raise NotImplementedError
 
+    @classmethod
     @property
     @abstractmethod
-    def avail_constraint_names(self) -> list[str]:
+    def avail_constraint_names(cls) -> list[str]:
         raise NotImplementedError
 
+    @classmethod
     @property
     @abstractmethod
-    def dataset_names(self) -> list[str]:
+    def dataset_names(cls) -> list[str]:
+        raise NotImplementedError
+
+    @classmethod
+    @property
+    @abstractmethod
+    def discrete_space(cls) -> dict[str, list[int | float | str | bool]]:
         raise NotImplementedError
 
     @property
@@ -197,4 +209,10 @@ class BaseBench(metaclass=ABCMeta):
     def constraint_info(self) -> pd.DataFrame:
         return pd.read_csv(
             os.path.join(self._curdir, "metadata", f"{self._dataset_name}.csv")
+        )
+
+    @classmethod
+    def get_constraint_info(cls, dataset_name: str) -> pd.DataFrame:
+        return pd.read_csv(
+            os.path.join(cls._curdir, "metadata", f"{dataset_name}.csv")
         )

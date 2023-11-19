@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import pickle
+from copy import deepcopy
 
 from chpobench.base import (
     BaseBench,
@@ -14,10 +15,11 @@ from chpobench.base import (
 
 
 class HPOBench(BaseBench):
+    _discrete_space: dict[str, list[int | float | bool | str]] = json.load(
+        open(os.path.join(BaseBench._curdir, "discrete_spaces.json"))
+    )["hpobench"]
+
     def _init_bench(self) -> None:
-        self._search_space = json.load(
-            open(os.path.join(self._curdir, "discrete_spaces.json"))
-        )["hpobench"]
         self._data = pickle.load(
             open(os.path.join(self._data_path, f"{self._dataset_name}.pkl"), mode="rb")
         )
@@ -36,7 +38,7 @@ class HPOBench(BaseBench):
             index = "".join(
                 [
                     str(choices.index(config[key]))
-                    for key, choices in self._search_space.items()
+                    for key, choices in self.discrete_space.items()
                 ]
             )
             query = self._data[index]
@@ -56,8 +58,9 @@ class HPOBench(BaseBench):
         )
         return {k: v for k, v in results.items() if k in self._metric_names}
 
+    @classmethod
     @property
-    def dataset_names(self) -> list[str]:
+    def dataset_names(cls) -> list[str]:
         return [
             "australian",
             "blood_transfusion",
@@ -69,25 +72,34 @@ class HPOBench(BaseBench):
             "vehicle",
         ]
 
+    @classmethod
     @property
-    def avail_obj_names(self) -> list[str]:
+    def avail_obj_names(cls) -> list[str]:
         return ["precision", "f1", "runtime", "loss"]
 
+    @classmethod
     @property
-    def avail_constraint_names(self) -> list[str]:
+    def avail_constraint_names(cls) -> list[str]:
         return ["precision", "runtime"]
 
+    @classmethod
     @property
-    def config_space(self) -> dict[str, BaseDistributionParams]:
+    def config_space(cls) -> dict[str, BaseDistributionParams]:
         config_space: dict[str, BaseDistributionParams] = {
             name: OrdinalDistributionParams(name=name, seq=choices)
-            for name, choices in self._search_space.items()
+            for name, choices in cls.discrete_space.items()
         }
         return config_space
 
+    @classmethod
     @property
-    def fidel_space(self) -> dict[str, BaseDistributionParams]:
+    def fidel_space(cls) -> dict[str, BaseDistributionParams]:
         fidel_space: dict[str, BaseDistributionParams] = {
             "epochs": OrdinalDistributionParams(name="epochs", seq=[3, 9, 27, 81, 243])
         }
         return fidel_space
+
+    @classmethod
+    @property
+    def discrete_space(cls) -> dict[str, list[int | float | str | bool]]:
+        return deepcopy(cls._discrete_space)

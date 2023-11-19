@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import pickle
+from copy import deepcopy
 
 from chpobench.base import (
     BaseBench,
@@ -14,10 +15,11 @@ from chpobench.base import (
 
 
 class HPOLib(BaseBench):
+    _discrete_space: dict[str, list[int | float | bool | str]] = json.load(
+        open(os.path.join(BaseBench._curdir, "discrete_spaces.json"))
+    )["hpolib"]
+
     def _init_bench(self) -> None:
-        self._search_space = json.load(
-            open(os.path.join(self._curdir, "discrete_spaces.json"))
-        )["hpolib"]
         self._data = pickle.load(
             open(os.path.join(self._data_path, f"{self._dataset_name}.pkl"), mode="rb")
         )
@@ -36,7 +38,7 @@ class HPOLib(BaseBench):
             index = "".join(
                 [
                     str(choices.index(config[key]))
-                    for key, choices in self._search_space.items()
+                    for key, choices in self.discrete_space.items()
                 ]
             )
             query = self._data[index]
@@ -55,8 +57,9 @@ class HPOLib(BaseBench):
         )
         return {k: v for k, v in results.items() if k in self._metric_names}
 
+    @classmethod
     @property
-    def dataset_names(self) -> list[str]:
+    def dataset_names(cls) -> list[str]:
         return [
             "parkinsons_telemonitoring",
             "protein_structure",
@@ -64,19 +67,21 @@ class HPOLib(BaseBench):
             "slice_localization",
         ]
 
+    @classmethod
     @property
-    def avail_obj_names(self) -> list[str]:
+    def avail_obj_names(cls) -> list[str]:
         return ["model_size", "runtime", "loss"]
 
+    @classmethod
     @property
-    def avail_constraint_names(self) -> list[str]:
+    def avail_constraint_names(cls) -> list[str]:
         return ["model_size", "runtime"]
 
-
+    @classmethod
     @property
-    def config_space(self) -> dict[str, BaseDistributionParams]:
+    def config_space(cls) -> dict[str, BaseDistributionParams]:
         config_space: dict[str, BaseDistributionParams] = {}
-        for name, choices in self._search_space.items():
+        for name, choices in cls.discrete_space.items():
             if isinstance(choices[0], str):
                 config_space[name] = CategoricalDistributionParams(
                     name=name, choices=choices
@@ -86,6 +91,12 @@ class HPOLib(BaseBench):
 
         return config_space
 
+    @classmethod
     @property
-    def fidel_space(self) -> dict[str, BaseDistributionParams]:
+    def fidel_space(cls) -> dict[str, BaseDistributionParams]:
         return {"epochs": IntDistributionParams(name="epochs", lower=1, upper=100)}
+
+    @classmethod
+    @property
+    def discrete_space(cls) -> dict[str, list[int | float | str | bool]]:
+        return deepcopy(cls._discrete_space)

@@ -3,6 +3,14 @@ import os
 from chpobench import JAHSBench201
 
 
+print(f"{JAHSBench201.dataset_names=}")
+print(f"{JAHSBench201.avail_constraint_names=}")
+print(f"{JAHSBench201.avail_obj_names=}")
+print(f"{JAHSBench201.config_space=}")
+print(f"{JAHSBench201.fidel_space=}")
+
+# You can check the constraint information by this.
+print(JAHSBench201.get_constraint_info(JAHSBench201.dataset_names[0]))
 bench = JAHSBench201(
     data_path=os.path.join(os.environ["HOME"], "hpo_benchmarks/jahs/"),
     dataset_name="cifar10",
@@ -18,5 +26,4 @@ config = {
 }
 
 print(bench.constraints)
-print(bench.constraint_info)
 print(bench(config))

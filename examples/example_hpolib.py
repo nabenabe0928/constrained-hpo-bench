@@ -3,11 +3,19 @@ import os
 from chpobench import HPOLib
 
 
+print(f"{HPOLib.dataset_names=}")
+print(f"{HPOLib.avail_constraint_names=}")
+print(f"{HPOLib.avail_obj_names=}")
+print(f"{HPOLib.config_space=}")
+print(f"{HPOLib.fidel_space=}")
+
+# You can check the constraint information by this.
+print(HPOLib.get_constraint_info(HPOLib.dataset_names[0]))
 bench = HPOLib(
     data_path=os.path.join(os.environ["HOME"], "hpo_benchmarks/hpolib/"),
-    dataset_name="naval_propulsion",
+    dataset_name=HPOLib.dataset_names[0],
     quantiles={"runtime": 0.1, "model_size": 0.5},
-    metric_names=["runtime", "loss", "model_size"],
+    metric_names=HPOLib.avail_obj_names,
 )
 
 config = {
@@ -18,5 +26,4 @@ config = {
 }
 
 print(bench.constraints)
-print(bench.constraint_info)
 print(bench(config))
