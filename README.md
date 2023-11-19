@@ -1,6 +1,6 @@
 # Benchmark for Constrained Hyperparameter Optimization
 
-This repository provides a constrained hyperparameter optimization benchmark dataset based on [HPOLib](https://github.com/automl/HPOlib1.5) and [JAHS-Bench-201](https://github.com/automl/jahs_bench_201/).
+This repository provides a constrained hyperparameter optimization benchmark dataset based on [HPOLib](https://github.com/automl/HPOlib1.5), [HPOBench](https://github.com/automl/hpobench), and [JAHS-Bench-201](https://github.com/automl/jahs_bench_201/).
 
 I separately developed this benchmark because the difficulties of constrained optimization depends on [1]:
 1. how tight each constraint is, and
@@ -44,6 +44,28 @@ data_dir = "<YOUR_DATA_PATH>"
 
 extract_hpolib(data_dir=data_dir, epochs=epochs)
 ```
+
+### HPOBench
+
+```
+$ cd <YOUR_DATA_PATH>
+$ wget https://ndownloader.figshare.com/files/30379005
+$ unzip nn.zip
+```
+
+Then extract the benchmark dataset in a usable format:
+
+```python
+from hpolib_extractor import extract_hpobench
+
+
+# Choose epochs to use from [3, 9, 27, 81, 243].
+epochs = [3, 9, 27, 81, 243]
+data_dir = "<YOUR_DATA_PATH>"
+
+extract_hpobench(data_dir=data_dir, epochs=epochs)
+```
+
 
 ### JAHS-Bench-201
 

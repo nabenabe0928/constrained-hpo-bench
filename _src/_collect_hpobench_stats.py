@@ -21,10 +21,14 @@ class HPOLibObjectiveNames(ObjectiveNames):
 
 
 DATASET_NAMES = [
-    "parkinsons_telemonitoring.pkl",
-    "protein_structure.pkl",
-    "naval_propulsion.pkl",
-    "slice_localization.pkl",
+    "australian.pkl",
+    "blood_transfusion.pkl",
+    "car.pkl",
+    "credit_g.pkl",
+    "kc1.pkl",
+    "phoneme.pkl",
+    "segment.pkl",
+    "vehicle.pkl",
 ]
 N_SEEDS = 4
 OBJ_NAMES = HPOLibObjectiveNames()
@@ -36,11 +40,17 @@ def get_dataframe(data_path: str) -> pd.DataFrame:
     data = pickle.load(open(data_path, mode="rb"))
     obj_vals = {param_name: [] for param_name in OBJ_NAMES.__dict__.values()}
     for vs in itertools.product(*list(SEARCH_SPACE.values())):
-        index = "".join([str(choices.index(v)) for choices, v in zip(SEARCH_SPACE.values(), vs)])
-        query = data[index]
-        obj_vals[OBJ_NAMES.loss].extend([query[OBJ_NAMES.loss][seed][100] for seed in range(N_SEEDS)])
-        obj_vals[OBJ_NAMES.model_size].extend([query[OBJ_NAMES.model_size] for seed in range(N_SEEDS)])
-        obj_vals[OBJ_NAMES.runtime].extend([query[OBJ_NAMES.runtime][seed] for seed in range(N_SEEDS)])
+        config = {k: v for k, v in zip(SEARCH_SPACE, vs)}
+        query = data[json.dumps(config)]
+        for obj_name, vals in obj_vals.items():
+            vals.extend(
+                [
+                    query[obj_name][seed][99]
+                    if obj_name == OBJ_NAMES.loss
+                    else query[obj_name][seed]
+                    for seed in range(N_SEEDS)
+                ]
+            )
 
     return pd.DataFrame(obj_vals)
 

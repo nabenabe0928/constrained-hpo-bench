@@ -27,13 +27,13 @@ class HPOLib(BaseBench):
         config: dict[str, int | float | str | bool],
         fidels: dict[str, int | float] | None = None,
     ) -> dict[str, float]:
-        config_to_dump = {k: config[k] for k in self._search_space}
         epochs = 100 if fidels is None else fidels["epochs"]
         seed = self._rng.randint(4)
         try:
-            query = self._data[json.dumps(config_to_dump)]
+            index = "".join([str(choices.index(config[key])) for key, choices in self._search_space.items()])
+            query = self._data[index]
         except KeyError:
-            raise KeyError(f"HPOLib does not have the config: {config_to_dump}")
+            raise KeyError(f"HPOLib does not have the config: {config}")
 
         MAX_EPOCHS = 100
         if epochs > MAX_EPOCHS or epochs < 1:
@@ -42,8 +42,8 @@ class HPOLib(BaseBench):
             )
 
         return dict(
-            loss=query["valid_mse"][seed][epochs - 1],
-            model_size=query["n_params"][seed],
+            loss=query["valid_mse"][seed][epochs],
+            model_size=query["n_params"],
             runtime=query["runtime"][seed] * epochs / MAX_EPOCHS,
         )
 

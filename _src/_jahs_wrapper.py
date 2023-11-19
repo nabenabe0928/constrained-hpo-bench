@@ -13,7 +13,7 @@ class BenchmarkWrapper(Benchmark):
         self,
         task: Literal["colorectal_histology", "cifar10", "fashion_mnist"],
         save_dir: str = os.path.join(
-            os.environ["HOME"], "tabular_benchmarks/jahs_bench_data/"
+            os.environ["HOME"], "hpo_benchmarks/jahs/"
         ),
         download: bool = False,
         metrics: list[str] | None = None,
