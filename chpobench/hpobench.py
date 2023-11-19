@@ -14,7 +14,7 @@ from chpobench.base import (
 
 
 class HPOBench(BaseBench):
-    def _init_bench(self):
+    def _init_bench(self) -> None:
         self._dataset_names = [
             "australian",
             "blood_transfusion",
@@ -71,15 +71,15 @@ class HPOBench(BaseBench):
 
     @property
     def config_space(self) -> dict[str, BaseDistributionParams]:
-        config_space = {
+        config_space: dict[str, BaseDistributionParams] = {
             name: OrdinalDistributionParams(name=name, seq=choices)
             for name, choices in self._search_space.items()
         }
-
         return config_space
 
     @property
-    def fidel_space(self) -> list[BaseDistributionParams]:
-        return {
+    def fidel_space(self) -> dict[str, BaseDistributionParams]:
+        fidel_space: dict[str, BaseDistributionParams] = {
             "epochs": OrdinalDistributionParams(name="epochs", seq=[3, 9, 27, 81, 243])
         }
+        return fidel_space

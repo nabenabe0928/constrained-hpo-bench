@@ -14,7 +14,7 @@ from chpobench.base import (
 
 
 class HPOLib(BaseBench):
-    def _init_bench(self):
+    def _init_bench(self) -> None:
         self._dataset_names = [
             "parkinsons_telemonitoring",
             "protein_structure",
@@ -66,7 +66,7 @@ class HPOLib(BaseBench):
 
     @property
     def config_space(self) -> dict[str, BaseDistributionParams]:
-        config_space = {}
+        config_space: dict[str, BaseDistributionParams] = {}
         for name, choices in self._search_space.items():
             if isinstance(choices[0], str):
                 config_space[name] = CategoricalDistributionParams(

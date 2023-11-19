@@ -26,6 +26,7 @@ class FloatDistributionParams(BaseDistributionParams):
     log: bool = False
 
     def __contains__(self, value: int | float | str | bool) -> bool:
+        assert isinstance(value, float)  # mypy redefinition.
         EPS = (self.upper - self.lower) * 1e-5
         return self.lower - EPS <= value <= self.upper + EPS
 
@@ -38,6 +39,7 @@ class IntDistributionParams(BaseDistributionParams):
     log: bool = False
 
     def __contains__(self, value: int | float | str | bool) -> bool:
+        assert isinstance(value, int)  # mypy redefinition.
         return self.lower <= value <= self.upper
 
 

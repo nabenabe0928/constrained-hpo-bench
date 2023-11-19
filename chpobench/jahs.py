@@ -16,7 +16,7 @@ from chpobench.base import (
 
 
 class JAHSBench201(BaseBench):
-    def _init_bench(self):
+    def _init_bench(self) -> None:
         self._dataset_names = ["colorectal_histology", "cifar10", "fashion_mnist"]
         self._validate_dataset_name()
         self._discrete_space = json.load(
@@ -61,7 +61,7 @@ class JAHSBench201(BaseBench):
 
     @property
     def config_space(self) -> dict[str, BaseDistributionParams]:
-        config_space = {
+        config_space: dict[str, BaseDistributionParams] = {
             "LearningRate": FloatDistributionParams(
                 name="LearningRate", lower=1e-3, upper=1.0, log=True
             ),
