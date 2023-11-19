@@ -70,10 +70,11 @@ class BaseBench(metaclass=ABCMeta):
                 f"{metric_names=} and {quantiles.keys()=}"
             )
 
-        self._constraints: dict[str, float]
-        self._set_constraints()
+        self._avail_constraint_names: list[str]
         self._dataset_names: list[str]
         self._init_bench()
+        self._constraints: dict[str, float]
+        self._set_constraints()
 
     def _validate_dataset_name(self) -> None:
         if self._dataset_name not in self._dataset_names:
@@ -82,23 +83,21 @@ class BaseBench(metaclass=ABCMeta):
             )
 
     def _set_constraints(self) -> None:
-        constraint_info = pd.read_csv(
-            os.path.join(self._curdir, "metadata", f"{self._dataset_name}.csv")
-        )
+        constraint_info = self.constraint_info
+        mask = True
         quantiles = self._quantiles.copy()
-        if "model_size" not in quantiles:
-            quantiles["model_size"] = 1.0
-        if "runtime" not in quantiles:
-            quantiles["runtime"] = 1.0
+        for cstr_name in self._avail_constraint_names:
+            if cstr_name not in quantiles:
+                quantiles[cstr_name] = 1.0
 
-        cond_model_size = (
-            constraint_info["model_size_quantile"] == quantiles["model_size"]
-        )
-        cond_runtime = constraint_info["runtime_quantile"] == quantiles["runtime"]
-        if np.sum(cond_model_size & cond_runtime) != 1:
+            mask = mask & (constraint_info[f"{cstr_name}_quantile"] == quantiles[cstr_name])
+
+        if np.sum(mask) != 1:
             raise ValueError(f"`{quantiles=}` was not correctly specified.")
+        if constraint_info[mask]["feasible_ratio"].iloc[0] == 0.0:
+            raise ValueError("Constraints are too tight. Please loosen some constraint quantiles.")
 
-        target = constraint_info[cond_model_size & cond_runtime]
+        target = constraint_info[mask]
         self._constraints = {
             key: target[f"{key}_threshold"].iloc[0] for key in self._quantiles
         }

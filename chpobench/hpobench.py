@@ -13,30 +13,34 @@ from chpobench.base import (
 )
 
 
-class HPOLib(BaseBench):
+class HPOBench(BaseBench):
     def _init_bench(self):
         self._dataset_names = [
-            "parkinsons_telemonitoring",
-            "protein_structure",
-            "naval_propulsion",
-            "slice_localization",
+            "australian",
+            "blood_transfusion",
+            "car",
+            "credit_g",
+            "kc1",
+            "phoneme",
+            "segment",
+            "vehicle",
         ]
         self._validate_dataset_name()
         self._search_space = json.load(
             open(os.path.join(self._curdir, "discrete_spaces.json"))
-        )["hpolib"]
+        )["hpobench"]
         self._data = pickle.load(
             open(os.path.join(self._data_path, f"{self._dataset_name}.pkl"), mode="rb")
         )
-        self._avail_constraint_names = ["model_size", "runtime"]
+        self._avail_constraint_names = ["precision", "runtime"]
 
     def __call__(
         self,
         config: dict[str, int | float | str | bool],
         fidels: dict[str, int | float] | None = None,
     ) -> dict[str, float]:
-        MAX_EPOCHS, N_SEEDS = 100, 4
-        epochs = MAX_EPOCHS if fidels is None else fidels["epochs"]
+        EPOCH_CHOICES, N_SEEDS = [3, 9, 27, 81, 243], 5
+        epochs = EPOCH_CHOICES[-1] if fidels is None else fidels["epochs"]
         seed = self._rng.randint(N_SEEDS)
         try:
             index = "".join(
@@ -47,33 +51,29 @@ class HPOLib(BaseBench):
             )
             query = self._data[index]
         except KeyError:
-            raise KeyError(f"HPOLib does not have the config: {config}")
+            raise KeyError(f"HPOBench does not have the config: {config}")
 
-        if epochs > MAX_EPOCHS or epochs < 1:
+        if epochs not in EPOCH_CHOICES:
             raise ValueError(
-                f"`epochs` of HPOLib must be in [1, {MAX_EPOCHS}], but got {epochs=}"
+                f"`epochs` of HPOLib must be in {EPOCH_CHOICES}, but got {epochs=}"
             )
 
         results = dict(
-            loss=query["valid_mse"][seed][epochs],
-            model_size=query["n_params"],
-            runtime=query["runtime"][seed] * epochs / MAX_EPOCHS,
+            loss=1.0 - query["bal_acc"][seed][epochs],
+            runtime=query["runtime"][seed][epochs],
+            f1=query["f1"][seed][epochs],
+            precision=query["precision"][seed][epochs]
         )
         return {k: v for k, v in results.items() if k in self._metric_names}
 
     @property
     def config_space(self) -> list[BaseDistributionParams]:
-        config_space = []
-        for name, choices in self._search_space.items():
-            if isinstance(choices[0], str):
-                config_space.append(
-                    CategoricalDistributionParams(name=name, choices=choices)
-                )
-            else:
-                config_space.append(OrdinalDistributionParams(name=name, seq=choices))
-
+        config_space = [
+            OrdinalDistributionParams(name=name, seq=choices)
+            for name, choices in self._search_space.items()
+        ]
         return config_space
 
     @property
     def fidel_space(self) -> list[BaseDistributionParams]:
-        return [IntDistributionParams(name="epochs", lower=1, upper=100)]
+        return [OrdinalDistributionParams(name="epochs", seq=[3, 9, 27, 81, 243])]

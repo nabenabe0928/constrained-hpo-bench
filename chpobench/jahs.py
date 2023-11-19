@@ -33,6 +33,7 @@ class JAHSBench201(BaseBench):
             metrics=[metric_dict[name] for name in self._metric_names],
             download=False,
         )
+        self._avail_constraint_names = ["model_size", "runtime"]
 
     def __call__(
         self,
