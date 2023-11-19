@@ -54,8 +54,6 @@
         ]
     },
     "jahs-bench-201": {
-        "LearningRate": [0.001, 1.0],
-        "WeightDecay": [0.00001, 0.01],
         "N": [1, 3, 5],
         "W": [4, 8, 16],
         "Activation": ["ReLU", "Hardswish", "Mish"],
