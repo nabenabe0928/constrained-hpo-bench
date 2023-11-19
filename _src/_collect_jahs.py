@@ -12,8 +12,8 @@ from _src._jahs_wrapper import BenchmarkWrapper
 @dataclass(frozen=True)
 class _ObjectiveNames:
     loss: str = "valid-acc"
-    model_size: str = "size_MB"
     runtime: str = "runtime"
+    model_size: str | None = "size_MB"
 
 
 TARGET_DIR = "_src/jahs_grid_data"

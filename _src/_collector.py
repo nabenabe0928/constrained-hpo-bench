@@ -9,8 +9,10 @@ from chpobench.constants import QUANTILES
 
 class ObjectiveNames:
     loss: str
-    model_size: str
     runtime: str
+    model_size: str | None = None
+    precision: str | None = None
+    f1: str | None = None
 
 
 class Collector:
@@ -22,9 +24,14 @@ class Collector:
         thresholds = {}
         indices = [int(self._n_total * q) - 1 for q in QUANTILES]
 
-        for param_name in list(self._obj_names.__dict__.values())[1:]:
-            sorted_vals = np.sort(df[param_name].to_numpy())
-            thresholds[param_name] = sorted_vals[indices].tolist()
+        for param_name in ["loss", "runtime", "model_size", "precision"]:
+            obj_name = getattr(self._obj_names, param_name)
+            if obj_name is None:
+                continue
+
+            sorted_vals = np.sort(df[obj_name].to_numpy())
+            sorted_vals = sorted_vals if param_name != "precision" else sorted_vals[::-1]
+            thresholds[obj_name] = sorted_vals[indices].tolist()
 
         return thresholds
 
@@ -32,7 +39,10 @@ class Collector:
     def get_mask(df: pd.DataFrame, threshold: dict[str, float]) -> list[bool]:
         mask = True
         for k, v in threshold.items():
-            mask = mask & (df[k] <= v)
+            if k != "precision":
+                mask = mask & (df[k] <= v)
+            else:
+                mask = mask & (df[k] >= v)
 
         return mask
 
@@ -65,9 +75,11 @@ class Collector:
             ]
         ]
 
+        first_cstr = "model_size" if self._obj_names.model_size is not None else "precision"
+
         data = {
-            "model_size_quantile": [],
-            "model_size_threshold": [],
+            f"{first_cstr}_quantile": [],
+            f"{first_cstr}_threshold": [],
             "runtime_quantile": [],
             "runtime_threshold": [],
             "optimal_val": [],
@@ -76,17 +88,16 @@ class Collector:
             "top_1%_overlap": [],
         }
         quantiles = QUANTILES[:]
-        for qs, ts in zip(quantiles, thresholds[self._obj_names.model_size]):
-            for qr, tr in zip(quantiles, thresholds[self._obj_names.runtime]):
-                th = {self._obj_names.model_size: ts, self._obj_names.runtime: tr}
-                th = {k: v for k, v in th.items() if v is not None}
+        for q1, t1 in zip(quantiles, thresholds[getattr(self._obj_names, first_cstr)]):
+            for q2, t2 in zip(quantiles, thresholds[self._obj_names.runtime]):
+                th = {getattr(self._obj_names, first_cstr): t1, self._obj_names.runtime: t2}
                 if len(th) == 0:
                     continue
 
-                data["model_size_quantile"].append(qs)
-                data["model_size_threshold"].append(ts)
-                data["runtime_quantile"].append(qr)
-                data["runtime_threshold"].append(tr)
+                data[f"{first_cstr}_quantile"].append(q1)
+                data[f"{first_cstr}_threshold"].append(t1)
+                data["runtime_quantile"].append(q2)
+                data["runtime_threshold"].append(t2)
                 data["optimal_val"].append(self.get_optimal_values(df, threshold=th))
                 data["feasible_ratio"].append(self.get_feasible_ratio(df, threshold=th))
                 data["top_10%_overlap"].append(

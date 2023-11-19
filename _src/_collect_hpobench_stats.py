@@ -14,12 +14,12 @@ from _src._collector import Collector, ObjectiveNames
 
 
 @dataclass(frozen=True)
-class HPOLibObjectiveNames(ObjectiveNames):
-    loss: str = "bal_acc"
+class HPOBenchObjectiveNames(ObjectiveNames):
+    loss: str = "err"
     runtime: str = "runtime"
-    precision
-    f1
-    bal_acc
+    precision: str = "precision"
+    f1: str = "f1"
+
 
 DATASET_NAMES = [
     "australian.pkl",
@@ -31,9 +31,9 @@ DATASET_NAMES = [
     "segment.pkl",
     "vehicle.pkl",
 ]
-N_SEEDS = 4
-OBJ_NAMES = HPOLibObjectiveNames()
-SEARCH_SPACE = json.load(open("chpobench/discrete_spaces.json"))["hpolib"]
+N_SEEDS = 5
+OBJ_NAMES = HPOBenchObjectiveNames()
+SEARCH_SPACE = json.load(open("chpobench/discrete_spaces.json"))["hpobench"]
 N_TOTAL = np.prod([len(vs) for vs in SEARCH_SPACE.values()])
 
 
@@ -41,17 +41,12 @@ def get_dataframe(data_path: str) -> pd.DataFrame:
     data = pickle.load(open(data_path, mode="rb"))
     obj_vals = {param_name: [] for param_name in OBJ_NAMES.__dict__.values()}
     for vs in itertools.product(*list(SEARCH_SPACE.values())):
-        config = {k: v for k, v in zip(SEARCH_SPACE, vs)}
-        query = data[json.dumps(config)]
-        for obj_name, vals in obj_vals.items():
-            vals.extend(
-                [
-                    query[obj_name][seed][99]
-                    if obj_name == OBJ_NAMES.loss
-                    else query[obj_name][seed]
-                    for seed in range(N_SEEDS)
-                ]
-            )
+        index = "".join([str(choices.index(v)) for choices, v in zip(SEARCH_SPACE.values(), vs)])
+        query = data[index]
+        obj_vals[OBJ_NAMES.loss].extend([query["bal_acc"][seed][243] for seed in range(N_SEEDS)])
+        obj_vals[OBJ_NAMES.precision].extend([query[OBJ_NAMES.precision][seed][243] for seed in range(N_SEEDS)])
+        obj_vals[OBJ_NAMES.f1].extend([query[OBJ_NAMES.f1][seed][243] for seed in range(N_SEEDS)])
+        obj_vals[OBJ_NAMES.runtime].extend([query[OBJ_NAMES.runtime][seed][243] for seed in range(N_SEEDS)])
 
     return pd.DataFrame(obj_vals)
 
@@ -61,7 +56,7 @@ if __name__ == "__main__":
     os.makedirs(target_path, exist_ok=True)
     for dataset_name in DATASET_NAMES:
         data_path = os.path.join(
-            os.environ["HOME"], f"hpo_benchmarks/hpolib/{dataset_name}"
+            os.environ["HOME"], f"hpo_benchmarks/hpobench/{dataset_name}"
         )
         df = get_dataframe(data_path)
         collector = Collector(obj_names=OBJ_NAMES, n_total=N_TOTAL * N_SEEDS)
