@@ -12,9 +12,7 @@ class BenchmarkWrapper(Benchmark):
     def __init__(
         self,
         task: Literal["colorectal_histology", "cifar10", "fashion_mnist"],
-        save_dir: str = os.path.join(
-            os.environ["HOME"], "hpo_benchmarks/jahs/"
-        ),
+        save_dir: str = os.path.join(os.environ["HOME"], "hpo_benchmarks/jahs/"),
         download: bool = False,
         metrics: list[str] | None = None,
     ):

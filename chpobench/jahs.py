@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import os
-import pickle
 
 from jahs_bench import Benchmark
 
@@ -52,7 +51,10 @@ class JAHSBench201(BaseBench):
             "runtime": "runtime",
             "size_MB": "model_size",
         }
-        return {metric_dict[k]: 100.0 - v if k == "valid-acc" else v for k, v in preds.items()}
+        return {
+            metric_dict[k]: 100.0 - v if k == "valid-acc" else v
+            for k, v in preds.items()
+        }
 
     @property
     def config_space(self) -> list[BaseDistributionParams]:

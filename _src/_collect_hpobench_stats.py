@@ -41,12 +41,22 @@ def get_dataframe(data_path: str) -> pd.DataFrame:
     data = pickle.load(open(data_path, mode="rb"))
     obj_vals = {param_name: [] for param_name in OBJ_NAMES.__dict__.values()}
     for vs in itertools.product(*list(SEARCH_SPACE.values())):
-        index = "".join([str(choices.index(v)) for choices, v in zip(SEARCH_SPACE.values(), vs)])
+        index = "".join(
+            [str(choices.index(v)) for choices, v in zip(SEARCH_SPACE.values(), vs)]
+        )
         query = data[index]
-        obj_vals[OBJ_NAMES.loss].extend([query["bal_acc"][seed][243] for seed in range(N_SEEDS)])
-        obj_vals[OBJ_NAMES.precision].extend([query[OBJ_NAMES.precision][seed][243] for seed in range(N_SEEDS)])
-        obj_vals[OBJ_NAMES.f1].extend([query[OBJ_NAMES.f1][seed][243] for seed in range(N_SEEDS)])
-        obj_vals[OBJ_NAMES.runtime].extend([query[OBJ_NAMES.runtime][seed][243] for seed in range(N_SEEDS)])
+        obj_vals[OBJ_NAMES.loss].extend(
+            [query["bal_acc"][seed][243] for seed in range(N_SEEDS)]
+        )
+        obj_vals[OBJ_NAMES.precision].extend(
+            [query[OBJ_NAMES.precision][seed][243] for seed in range(N_SEEDS)]
+        )
+        obj_vals[OBJ_NAMES.f1].extend(
+            [query[OBJ_NAMES.f1][seed][243] for seed in range(N_SEEDS)]
+        )
+        obj_vals[OBJ_NAMES.runtime].extend(
+            [query[OBJ_NAMES.runtime][seed][243] for seed in range(N_SEEDS)]
+        )
 
     return pd.DataFrame(obj_vals)
 

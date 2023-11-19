@@ -11,19 +11,12 @@ bench = JAHSBench201(
 )
 
 config = {
-    "LearningRate": 1e-3,
-    "WeightDecay": 1e-5,
-    "N": 1,
-    "W": 4,
-    "Activation": "ReLU",
-    "TrivialAugment": True,
-    "Op1": 0,
-    "Op2": 0,
-    "Op3": 0,
-    "Op4": 0,
-    "Op5": 0,
-    "Op6": 0,
+    config_info.name: config_info.choices[0]
+    if hasattr(config_info, "choices")
+    else (config_info.seq[0] if hasattr(config_info, "seq") else config_info.lower)
+    for config_info in bench.config_space
 }
 
 print(bench.constraints)
+print(bench.constraint_info)
 print(bench(config))

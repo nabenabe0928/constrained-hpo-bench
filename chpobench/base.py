@@ -128,3 +128,9 @@ class BaseBench(metaclass=ABCMeta):
     @property
     def constraints(self) -> dict[str, float]:
         return self._constraints.copy()
+
+    @property
+    def constraint_info(self) -> pd.DataFrame:
+        return pd.read_csv(
+            os.path.join(self._curdir, "metadata", f"{self._dataset_name}.csv")
+        )

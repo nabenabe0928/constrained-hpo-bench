@@ -30,7 +30,9 @@ class Collector:
                 continue
 
             sorted_vals = np.sort(df[obj_name].to_numpy())
-            sorted_vals = sorted_vals if param_name != "precision" else sorted_vals[::-1]
+            sorted_vals = (
+                sorted_vals if param_name != "precision" else sorted_vals[::-1]
+            )
             thresholds[obj_name] = sorted_vals[indices].tolist()
 
         return thresholds
@@ -75,7 +77,9 @@ class Collector:
             ]
         ]
 
-        first_cstr = "model_size" if self._obj_names.model_size is not None else "precision"
+        first_cstr = (
+            "model_size" if self._obj_names.model_size is not None else "precision"
+        )
 
         data = {
             f"{first_cstr}_quantile": [],
@@ -90,7 +94,10 @@ class Collector:
         quantiles = QUANTILES[:]
         for q1, t1 in zip(quantiles, thresholds[getattr(self._obj_names, first_cstr)]):
             for q2, t2 in zip(quantiles, thresholds[self._obj_names.runtime]):
-                th = {getattr(self._obj_names, first_cstr): t1, self._obj_names.runtime: t2}
+                th = {
+                    getattr(self._obj_names, first_cstr): t1,
+                    self._obj_names.runtime: t2,
+                }
                 if len(th) == 0:
                     continue
 
