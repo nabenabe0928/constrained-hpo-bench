@@ -15,6 +15,13 @@ from chpobench.base import (
 
 class HPOLib(BaseBench):
     def _init_bench(self):
+        self._dataset_names = [
+            "parkinsons_telemonitoring",
+            "protein_structure",
+            "naval_propulsion",
+            "slice_localization",
+        ]
+        self._validate_dataset_name()
         self._search_space = json.load(
             open(os.path.join(self._curdir, "discrete_spaces.json"))
         )["hpolib"]
@@ -30,7 +37,12 @@ class HPOLib(BaseBench):
         epochs = 100 if fidels is None else fidels["epochs"]
         seed = self._rng.randint(4)
         try:
-            index = "".join([str(choices.index(config[key])) for key, choices in self._search_space.items()])
+            index = "".join(
+                [
+                    str(choices.index(config[key]))
+                    for key, choices in self._search_space.items()
+                ]
+            )
             query = self._data[index]
         except KeyError:
             raise KeyError(f"HPOLib does not have the config: {config}")

@@ -15,10 +15,11 @@ from _src._collector import Collector, ObjectiveNames
 
 @dataclass(frozen=True)
 class HPOLibObjectiveNames(ObjectiveNames):
-    loss: str = "valid_mse"
-    model_size: str = "n_params"
+    loss: str = "bal_acc"
     runtime: str = "runtime"
-
+    precision
+    f1
+    bal_acc
 
 DATASET_NAMES = [
     "australian.pkl",

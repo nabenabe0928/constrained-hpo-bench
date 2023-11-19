@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
+from typing import Literal
 
 import numpy as np
 
@@ -40,7 +41,7 @@ class OrdinalDistributionParams(BaseDistributionParams):
 @dataclass(frozen=True)
 class CategoricalDistributionParams(BaseDistributionParams):
     name: str
-    choices: list[str | bool]
+    choices: list[int | str | bool]
 
 
 class BaseBench(metaclass=ABCMeta):
@@ -49,11 +50,13 @@ class BaseBench(metaclass=ABCMeta):
         data_path: str,
         dataset_name: str,
         quantiles: dict[str, float],
+        metric_names: list[Literal["loss", "model_size", "runtime", "precision", "f1"]],
         seed: int | None = None,
     ):
         self._data_path = data_path
         self._dataset_name = dataset_name
         self._quantiles = quantiles
+        self._metric_names = metric_names[:]
         self._rng = np.random.RandomState(seed)
         self._curdir = os.path.dirname(os.path.abspath(__file__))
 
@@ -61,10 +64,22 @@ class BaseBench(metaclass=ABCMeta):
             raise ValueError(
                 f"`quantiles` for each constraint must be in {constants.QUANTILES}, but got {quantiles}."
             )
+        if not set(self._quantiles).issubset(set(self._metric_names)):
+            raise ValueError(
+                "metric_names must be the superset of the keys specified in quantiles, but got "
+                f"{metric_names=} and {quantiles.keys()=}"
+            )
 
         self._constraints: dict[str, float]
         self._set_constraints()
+        self._dataset_names: list[str]
         self._init_bench()
+
+    def _validate_dataset_name(self) -> None:
+        if self._dataset_name not in self._dataset_names:
+            raise ValueError(
+                f"dataset_name must be in {self._dataset_names}, but got {self._dataset_name}."
+            )
 
     def _set_constraints(self) -> None:
         constraint_info = pd.read_csv(
