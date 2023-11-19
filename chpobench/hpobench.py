@@ -41,7 +41,9 @@ class HPOBench(BaseBench):
         fidels: dict[str, int | float] | None = None,
     ) -> dict[str, float]:
         EPOCH_CHOICES, N_SEEDS = [3, 9, 27, 81, 243], 5
-        epochs = EPOCH_CHOICES[-1] if fidels is None else fidels["epochs"]
+        fidels = {} if fidels is None else fidels.copy()
+        self._validate_input(config, fidels)
+        epochs = fidels.get("epochs", EPOCH_CHOICES[-1])
         seed = self._rng.randint(N_SEEDS)
         try:
             index = "".join(

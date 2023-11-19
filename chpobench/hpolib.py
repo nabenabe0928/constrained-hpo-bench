@@ -37,7 +37,9 @@ class HPOLib(BaseBench):
         fidels: dict[str, int | float] | None = None,
     ) -> dict[str, float]:
         MAX_EPOCHS, N_SEEDS = 100, 4
-        epochs = MAX_EPOCHS if fidels is None else fidels["epochs"]
+        fidels = {} if fidels is None else fidels.copy()
+        self._validate_input(config, fidels)
+        epochs = fidels.get("epochs", MAX_EPOCHS)
         seed = self._rng.randint(N_SEEDS)
         try:
             index = "".join(

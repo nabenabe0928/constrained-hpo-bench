@@ -133,6 +133,20 @@ class BaseBench(metaclass=ABCMeta):
             key: target[f"{key}_threshold"].iloc[0] for key in self._quantiles
         }
 
+    def _validate_input(
+        self,
+        config: dict[str, int | float | str | bool],
+        fidels: dict[str, int | float],
+    ) -> None:
+        config_space = self.config_space
+        fidel_space = self.fidel_space
+        for name in config:
+            if config[name] not in config_space[name]:
+                raise ValueError(f"`{name}` must follow {config_space[name]}, but got {config[name]}.")
+        for name in fidels:
+            if fidels[name] not in fidel_space[name]:
+                raise ValueError(f"`{name}` must follow {fidel_space[name]}, but got {fidels[name]}.")
+
     @abstractmethod
     def _init_bench(self) -> None:
         raise NotImplementedError
@@ -141,7 +155,7 @@ class BaseBench(metaclass=ABCMeta):
     def __call__(
         self,
         config: dict[str, int | float | str | bool],
-        fidels: dict[str, int | float],
+        fidels: dict[str, int | float] | None,
     ) -> dict[str, float]:
         raise NotImplementedError
 

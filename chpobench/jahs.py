@@ -42,6 +42,7 @@ class JAHSBench201(BaseBench):
         fidels: dict[str, int | float] | None = None,
     ) -> dict[str, float]:
         fidels = {} if fidels is None else fidels.copy()
+        self._validate_input(config, fidels)
         epochs = fidels.get("epochs", 200)
         resol = fidels.get("Resolution", 1.0)
         config["Optimizer"] = "SGD"
