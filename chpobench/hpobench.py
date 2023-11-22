@@ -4,6 +4,7 @@ import json
 import os
 import pickle
 from copy import deepcopy
+from typing import Literal
 
 from chpobench.base import (
     BaseBench,
@@ -81,6 +82,16 @@ class HPOBench(BaseBench):
     @property
     def avail_constraint_names(cls) -> list[str]:
         return ["precision", "runtime"]
+
+    @classmethod
+    @property
+    def directions(cls) -> dict[str, Literal["min", "max"]]:
+        return {
+            "precision": "max",
+            "f1": "max",
+            "runtime": "min",
+            "loss": "min",
+        }
 
     @classmethod
     @property

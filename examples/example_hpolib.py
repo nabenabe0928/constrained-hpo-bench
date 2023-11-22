@@ -6,6 +6,7 @@ from chpobench import HPOLib
 print(f"{HPOLib.dataset_names=}")
 print(f"{HPOLib.avail_constraint_names=}")
 print(f"{HPOLib.avail_obj_names=}")
+print(f"{HPOLib.directions=}")
 print(f"{HPOLib.config_space=}")
 print(f"{HPOLib.fidel_space=}")
 

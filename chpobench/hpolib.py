@@ -79,6 +79,15 @@ class HPOLib(BaseBench):
 
     @classmethod
     @property
+    def directions(cls) -> dict[str, Literal["min", "max"]]:
+        return {
+            "model_size": "min",
+            "runtime": "min",
+            "loss": "min",
+        }
+
+    @classmethod
+    @property
     def config_space(cls) -> dict[str, BaseDistributionParams]:
         config_space: dict[str, BaseDistributionParams] = {}
         for name, choices in cls.discrete_space.items():

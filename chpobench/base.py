@@ -201,6 +201,12 @@ class BaseBench(metaclass=ABCMeta):
     def discrete_space(cls) -> dict[str, list[int | float | str | bool]]:
         raise NotImplementedError
 
+    @classmethod
+    @property
+    @abstractmethod
+    def directions(cls) -> dict[str, Literal["min", "max"]]:
+        raise NotImplementedError
+
     @property
     def constraints(self) -> dict[str, float]:
         return self._constraints.copy()

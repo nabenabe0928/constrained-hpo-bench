@@ -6,6 +6,7 @@ from chpobench import JAHSBench201
 print(f"{JAHSBench201.dataset_names=}")
 print(f"{JAHSBench201.avail_constraint_names=}")
 print(f"{JAHSBench201.avail_obj_names=}")
+print(f"{JAHSBench201.directions=}")
 print(f"{JAHSBench201.config_space=}")
 print(f"{JAHSBench201.fidel_space=}")
 

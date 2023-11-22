@@ -6,6 +6,7 @@ from chpobench import HPOBench
 print(f"{HPOBench.dataset_names=}")
 print(f"{HPOBench.avail_constraint_names=}")
 print(f"{HPOBench.avail_obj_names=}")
+print(f"{HPOBench.directions=}")
 print(f"{HPOBench.config_space=}")
 print(f"{HPOBench.fidel_space=}")
 
