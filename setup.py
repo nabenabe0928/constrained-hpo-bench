@@ -10,7 +10,7 @@ with open("requirements.txt", "r") as f:
 
 setuptools.setup(
     name="chpobench",
-    version="0.0.3",
+    version="0.0.4",
     author="nabenabe0928",
     author_email="shuhei.watanabe.utokyo@gmail.com",
     url="https://github.com/nabenabe0928/constrained-hpo-bench",

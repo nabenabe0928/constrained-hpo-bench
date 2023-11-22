@@ -3,7 +3,7 @@ from chpobench.hpolib import HPOLib
 from chpobench.jahs import JAHSBench201
 
 
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 __copyright__ = "Copyright (C) 2023 Shuhei Watanabe"
 __licence__ = "Apache-2.0 License"
 __author__ = "Shuhei Watanabe"

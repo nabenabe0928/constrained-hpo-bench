@@ -80,6 +80,7 @@ class BaseBench(metaclass=ABCMeta):
         self._metric_names: list[str] = (
             deepcopy(metric_names) if metric_names is not None else self.avail_obj_names
         )
+        self._seed = seed
         self._rng = np.random.RandomState(seed)
 
         if any(q not in constants._QUANTILES for q in quantiles.values()):
@@ -96,6 +97,9 @@ class BaseBench(metaclass=ABCMeta):
         self._constraints: dict[str, float]
         self._set_constraints()
         self._validate_metric_names()
+
+    def reseed(self) -> None:
+        self._rng = np.random.RandomState(self._seed)
 
     def _validate_dataset_name(self) -> None:
         if self._dataset_name not in self.dataset_names:
@@ -209,6 +213,10 @@ class BaseBench(metaclass=ABCMeta):
     @abstractmethod
     def directions(cls) -> dict[str, Literal["min", "max"]]:
         raise NotImplementedError
+
+    @property
+    def dataset_name(self) -> str:
+        return self._dataset_name
 
     @property
     def constraints(self) -> dict[str, float]:
