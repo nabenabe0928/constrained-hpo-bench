@@ -9,8 +9,6 @@ from typing import Literal
 from chpobench.base import (
     BaseBench,
     BaseDistributionParams,
-    CategoricalDistributionParams,
-    IntDistributionParams,
     OrdinalDistributionParams,
 )
 

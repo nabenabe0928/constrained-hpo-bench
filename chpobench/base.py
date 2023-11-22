@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import os
 from abc import ABCMeta, abstractmethod
+from copy import deepcopy
 from dataclasses import dataclass
-from typing import Literal
+from typing import Final, Literal
 
 import numpy as np
 
@@ -62,26 +63,28 @@ class CategoricalDistributionParams(BaseDistributionParams):
 
 
 class BaseBench(metaclass=ABCMeta):
-    _curdir = os.path.dirname(os.path.abspath(__file__))
+    _curdir: Final[str] = os.path.dirname(os.path.abspath(__file__))
 
     def __init__(
         self,
         data_path: str,
         dataset_name: str,
         quantiles: dict[str, float],
-        metric_names: list[Literal["loss", "model_size", "runtime", "precision", "f1"]] | None = None,
+        metric_names: list[str] | None = None,
         seed: int | None = None,
     ):
         self._data_path = data_path
         self._dataset_name = dataset_name
         self._validate_dataset_name()
         self._quantiles = quantiles
-        self._metric_names = deepcopy(metric_names) if metric_names is not None else self.avail_obj_names
+        self._metric_names: list[str] = (
+            deepcopy(metric_names) if metric_names is not None else self.avail_obj_names
+        )
         self._rng = np.random.RandomState(seed)
 
-        if any(q not in constants.QUANTILES for q in quantiles.values()):
+        if any(q not in constants._QUANTILES for q in quantiles.values()):
             raise ValueError(
-                f"`quantiles` for each constraint must be in {constants.QUANTILES}, but got {quantiles}."
+                f"`quantiles` for each constraint must be in {constants._QUANTILES}, but got {quantiles}."
             )
         if not set(self._quantiles).issubset(set(self._metric_names)):
             raise ValueError(
@@ -219,10 +222,8 @@ class BaseBench(metaclass=ABCMeta):
 
     @classmethod
     def avail_quantiles(cls) -> list[float]:
-        return deepcopy(constants.QUANTILES)
+        return deepcopy(constants._QUANTILES)
 
     @classmethod
     def get_constraint_info(cls, dataset_name: str) -> pd.DataFrame:
-        return pd.read_csv(
-            os.path.join(cls._curdir, "metadata", f"{dataset_name}.csv")
-        )
+        return pd.read_csv(os.path.join(cls._curdir, "metadata", f"{dataset_name}.csv"))

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Final
 
 
-QUANTILES: Final[list[float]] = [
+_QUANTILES: Final[list[float]] = [
     0.001,
     0.005,
     0.01,

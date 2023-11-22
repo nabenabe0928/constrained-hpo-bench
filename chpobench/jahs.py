@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 from copy import deepcopy
+from typing import Literal
 
 from jahs_bench import Benchmark
 

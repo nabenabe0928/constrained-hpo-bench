@@ -4,7 +4,7 @@ import numpy as np
 
 import pandas as pd
 
-from chpobench.constants import QUANTILES
+from chpobench.constants import _QUANTILES
 
 
 class ObjectiveNames:
@@ -22,7 +22,7 @@ class Collector:
 
     def get_thresholds(self, df: pd.DataFrame) -> dict[str, list[float]]:
         thresholds = {}
-        indices = [int(self._n_total * q) - 1 for q in QUANTILES]
+        indices = [int(self._n_total * q) - 1 for q in _QUANTILES]
 
         for param_name in ["loss", "runtime", "model_size", "precision"]:
             obj_name = getattr(self._obj_names, param_name)
@@ -91,7 +91,7 @@ class Collector:
             "top_10%_overlap": [],
             "top_1%_overlap": [],
         }
-        quantiles = QUANTILES[:]
+        quantiles = _QUANTILES[:]
         for q1, t1 in zip(quantiles, thresholds[getattr(self._obj_names, first_cstr)]):
             for q2, t2 in zip(quantiles, thresholds[self._obj_names.runtime]):
                 th = {

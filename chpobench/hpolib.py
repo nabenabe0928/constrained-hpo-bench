@@ -4,6 +4,7 @@ import json
 import os
 import pickle
 from copy import deepcopy
+from typing import Literal
 
 from chpobench.base import (
     BaseBench,
