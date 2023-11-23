@@ -46,7 +46,7 @@ def get_dataframe(data_path: str) -> pd.DataFrame:
         )
         query = data[index]
         obj_vals[OBJ_NAMES.loss].extend(
-            [query["bal_acc"][seed][243] for seed in range(N_SEEDS)]
+            [1.0 - query["bal_acc"][seed][243] for seed in range(N_SEEDS)]
         )
         obj_vals[OBJ_NAMES.precision].extend(
             [query[OBJ_NAMES.precision][seed][243] for seed in range(N_SEEDS)]

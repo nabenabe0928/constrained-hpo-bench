@@ -3,10 +3,11 @@ from __future__ import annotations
 import json
 import os
 from copy import deepcopy
-from typing import Literal
+from typing import Final, Literal
 
 from jahs_bench import Benchmark
 
+from chpobench import constants
 from chpobench.base import (
     BaseBench,
     BaseDistributionParams,
@@ -17,16 +18,23 @@ from chpobench.base import (
 )
 
 
+_RESOL_KEY: Final[str] = "Resolution"
+_JAHS_LOSS_KEY: Final[str] = "valid-acc"
+_JAHS_RUNTIME_KEY: Final[str] = "runtime"
+_JAHS_MODEL_SIZE_KEY: Final[str] = "size_MB"
+
+
 class JAHSBench201(BaseBench):
     _discrete_space: dict[str, list[int | float | bool | str]] = json.load(
         open(os.path.join(BaseBench._curdir, "discrete_spaces.json"))
     )["jahs-bench-201"]
+    _MAX_EPOCHS: Final[int] = 200
 
     def _init_bench(self) -> None:
         metric_dict = {
-            "loss": "valid-acc",
-            "runtime": "runtime",
-            "model_size": "size_MB",
+            constants._LOSS_KEY: _JAHS_LOSS_KEY,
+            constants._RUNTIME_KEY: _JAHS_RUNTIME_KEY,
+            constants._MODEL_SIZE_KEY: _JAHS_MODEL_SIZE_KEY,
         }
         self._surrogate = Benchmark(
             task=self._dataset_name,
@@ -42,19 +50,19 @@ class JAHSBench201(BaseBench):
     ) -> dict[str, float]:
         fidels = {} if fidels is None else fidels.copy()
         self._validate_input(config, fidels)
-        epochs = fidels.get("epochs", 200)
-        resol = fidels.get("Resolution", 1.0)
+        epochs = fidels.get(constants._EPOCHS_KEY, self._MAX_EPOCHS)
+        resol = fidels.get(_RESOL_KEY, 1.0)
         config["Optimizer"] = "SGD"
-        config["Resolution"] = resol
+        config[_RESOL_KEY] = resol
 
         preds = self._surrogate(config, nepochs=epochs)[epochs]
         metric_dict = {
-            "valid-acc": "loss",
-            "runtime": "runtime",
-            "size_MB": "model_size",
+            _JAHS_LOSS_KEY: constants._LOSS_KEY,
+            _JAHS_RUNTIME_KEY: constants._RUNTIME_KEY,
+            _JAHS_MODEL_SIZE_KEY: constants._MODEL_SIZE_KEY,
         }
         return {
-            metric_dict[k]: 100.0 - v if k == "valid-acc" else v
+            metric_dict[k]: 100.0 - v if k == _JAHS_LOSS_KEY else v
             for k, v in preds.items()
         }
 
@@ -66,20 +74,20 @@ class JAHSBench201(BaseBench):
     @classmethod
     @property
     def avail_obj_names(cls) -> list[str]:
-        return ["model_size", "runtime", "loss"]
+        return [constants._LOSS_KEY, constants._RUNTIME_KEY, constants._MODEL_SIZE_KEY]
 
     @classmethod
     @property
     def avail_constraint_names(cls) -> list[str]:
-        return ["model_size", "runtime"]
+        return [constants._RUNTIME_KEY, constants._MODEL_SIZE_KEY]
 
     @classmethod
     @property
     def directions(cls) -> dict[str, Literal["min", "max"]]:
         return {
-            "model_size": "min",
-            "runtime": "min",
-            "loss": "min",
+            constants._LOSS_KEY: "min",
+            constants._RUNTIME_KEY: "min",
+            constants._MODEL_SIZE_KEY: "min",
         }
 
     @classmethod
@@ -107,10 +115,10 @@ class JAHSBench201(BaseBench):
     @property
     def fidel_space(cls) -> dict[str, BaseDistributionParams]:
         return {
-            "epochs": IntDistributionParams(name="epochs", lower=1, upper=100),
-            "Resolution": FloatDistributionParams(
-                name="Resolution", lower=0.0, upper=1.0
+            constants._EPOCHS_KEY: IntDistributionParams(
+                name=constants._EPOCHS_KEY, lower=1, upper=cls._MAX_EPOCHS
             ),
+            _RESOL_KEY: FloatDistributionParams(name=_RESOL_KEY, lower=0.0, upper=1.0),
         }
 
     @classmethod

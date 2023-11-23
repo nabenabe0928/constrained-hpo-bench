@@ -4,8 +4,9 @@ import json
 import os
 import pickle
 from copy import deepcopy
-from typing import Literal
+from typing import Final, Literal
 
+from chpobench import constants
 from chpobench.base import (
     BaseBench,
     BaseDistributionParams,
@@ -19,6 +20,8 @@ class HPOLib(BaseBench):
     _discrete_space: dict[str, list[int | float | bool | str]] = json.load(
         open(os.path.join(BaseBench._curdir, "discrete_spaces.json"))
     )["hpolib"]
+    _N_SEEDS: Final[int] = 4
+    _MAX_EPOCHS: Final[int] = 100
 
     def _init_bench(self) -> None:
         self._data = pickle.load(
@@ -30,11 +33,10 @@ class HPOLib(BaseBench):
         config: dict[str, int | float | str | bool],
         fidels: dict[str, int | float] | None = None,
     ) -> dict[str, float]:
-        MAX_EPOCHS, N_SEEDS = 100, 4
         fidels = {} if fidels is None else fidels.copy()
         self._validate_input(config, fidels)
-        epochs = fidels.get("epochs", MAX_EPOCHS)
-        seed = self._rng.randint(N_SEEDS)
+        epochs = fidels.get(constants._EPOCHS_KEY, self._MAX_EPOCHS)
+        seed = self._rng.randint(self._N_SEEDS)
         try:
             index = "".join(
                 [
@@ -46,15 +48,15 @@ class HPOLib(BaseBench):
         except KeyError:
             raise KeyError(f"HPOLib does not have the config: {config}")
 
-        if epochs > MAX_EPOCHS or epochs < 1:
+        if epochs > self._MAX_EPOCHS or epochs < 1:
             raise ValueError(
-                f"`epochs` of HPOLib must be in [1, {MAX_EPOCHS}], but got {epochs=}"
+                f"`epochs` of HPOLib must be in [1, {self._MAX_EPOCHS}], but got {epochs=}"
             )
 
         results = dict(
             loss=query["valid_mse"][seed][epochs],
             model_size=query["n_params"],
-            runtime=query["runtime"][seed] * epochs / MAX_EPOCHS,
+            runtime=query["runtime"][seed] * epochs / self._MAX_EPOCHS,
         )
         return {k: v for k, v in results.items() if k in self._metric_names}
 
@@ -71,20 +73,20 @@ class HPOLib(BaseBench):
     @classmethod
     @property
     def avail_obj_names(cls) -> list[str]:
-        return ["model_size", "runtime", "loss"]
+        return [constants._LOSS_KEY, constants._RUNTIME_KEY, constants._MODEL_SIZE_KEY]
 
     @classmethod
     @property
     def avail_constraint_names(cls) -> list[str]:
-        return ["model_size", "runtime"]
+        return [constants._RUNTIME_KEY, constants._MODEL_SIZE_KEY]
 
     @classmethod
     @property
     def directions(cls) -> dict[str, Literal["min", "max"]]:
         return {
-            "model_size": "min",
-            "runtime": "min",
-            "loss": "min",
+            constants._LOSS_KEY: "min",
+            constants._RUNTIME_KEY: "min",
+            constants._MODEL_SIZE_KEY: "min",
         }
 
     @classmethod
@@ -104,7 +106,11 @@ class HPOLib(BaseBench):
     @classmethod
     @property
     def fidel_space(cls) -> dict[str, BaseDistributionParams]:
-        return {"epochs": IntDistributionParams(name="epochs", lower=1, upper=100)}
+        return {
+            constants._EPOCHS_KEY: IntDistributionParams(
+                name=constants._EPOCHS_KEY, lower=1, upper=cls._MAX_EPOCHS
+            )
+        }
 
     @classmethod
     @property

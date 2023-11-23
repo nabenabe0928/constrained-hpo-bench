@@ -4,8 +4,9 @@ import json
 import os
 import pickle
 from copy import deepcopy
-from typing import Literal
+from typing import Final, Literal
 
+from chpobench import constants
 from chpobench.base import (
     BaseBench,
     BaseDistributionParams,
@@ -17,6 +18,8 @@ class HPOBench(BaseBench):
     _discrete_space: dict[str, list[int | float | bool | str]] = json.load(
         open(os.path.join(BaseBench._curdir, "discrete_spaces.json"))
     )["hpobench"]
+    _EPOCH_CHOICES: Final[list[int]] = [3, 9, 27, 81, 243]
+    _N_SEEDS: Final[int] = 5
 
     def _init_bench(self) -> None:
         self._data = pickle.load(
@@ -28,11 +31,10 @@ class HPOBench(BaseBench):
         config: dict[str, int | float | str | bool],
         fidels: dict[str, int | float] | None = None,
     ) -> dict[str, float]:
-        EPOCH_CHOICES, N_SEEDS = [3, 9, 27, 81, 243], 5
         fidels = {} if fidels is None else fidels.copy()
         self._validate_input(config, fidels)
-        epochs = fidels.get("epochs", EPOCH_CHOICES[-1])
-        seed = self._rng.randint(N_SEEDS)
+        epochs = fidels.get(constants._EPOCHS_KEY, self._EPOCH_CHOICES[-1])
+        seed = self._rng.randint(self._N_SEEDS)
         try:
             index = "".join(
                 [
@@ -44,17 +46,17 @@ class HPOBench(BaseBench):
         except KeyError:
             raise KeyError(f"HPOBench does not have the config: {config}")
 
-        if epochs not in EPOCH_CHOICES:
+        if epochs not in self._EPOCH_CHOICES:
             raise ValueError(
-                f"`epochs` of HPOLib must be in {EPOCH_CHOICES}, but got {epochs=}"
+                f"`epochs` of HPOBench must be in {self._EPOCH_CHOICES}, but got {epochs=}"
             )
 
-        results = dict(
-            loss=1.0 - query["bal_acc"][seed][epochs],
-            runtime=query["runtime"][seed][epochs],
-            f1=query["f1"][seed][epochs],
-            precision=query["precision"][seed][epochs],
-        )
+        results = {
+            constants._LOSS_KEY: 1.0 - query["bal_acc"][seed][epochs],
+            constants._RUNTIME_KEY: query["runtime"][seed][epochs],
+            constants._F1_KEY: query["f1"][seed][epochs],
+            constants._PRECISION_KEY: query["precision"][seed][epochs],
+        }
         return {k: v for k, v in results.items() if k in self._metric_names}
 
     @classmethod
@@ -74,21 +76,26 @@ class HPOBench(BaseBench):
     @classmethod
     @property
     def avail_obj_names(cls) -> list[str]:
-        return ["precision", "f1", "runtime", "loss"]
+        return [
+            constants._LOSS_KEY,
+            constants._F1_KEY,
+            constants._RUNTIME_KEY,
+            constants._PRECISION_KEY,
+        ]
 
     @classmethod
     @property
     def avail_constraint_names(cls) -> list[str]:
-        return ["precision", "runtime"]
+        return [constants._RUNTIME_KEY, constants._PRECISION_KEY]
 
     @classmethod
     @property
     def directions(cls) -> dict[str, Literal["min", "max"]]:
         return {
-            "precision": "max",
-            "f1": "max",
-            "runtime": "min",
-            "loss": "min",
+            constants._LOSS_KEY: "min",
+            constants._F1_KEY: "max",
+            constants._RUNTIME_KEY: "min",
+            constants._PRECISION_KEY: "max",
         }
 
     @classmethod
@@ -104,7 +111,9 @@ class HPOBench(BaseBench):
     @property
     def fidel_space(cls) -> dict[str, BaseDistributionParams]:
         fidel_space: dict[str, BaseDistributionParams] = {
-            "epochs": OrdinalDistributionParams(name="epochs", seq=[3, 9, 27, 81, 243])
+            constants._EPOCHS_KEY: OrdinalDistributionParams(
+                name=constants._EPOCHS_KEY, seq=deepcopy(cls._EPOCH_CHOICES)
+            )
         }
         return fidel_space
 
